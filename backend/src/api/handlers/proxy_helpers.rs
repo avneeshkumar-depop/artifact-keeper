@@ -4776,7 +4776,9 @@ where
     F: Fn(Bytes, Option<String>, Option<String>, Option<DateTime<Utc>>, String) -> Fut,
     Fut: std::future::Future<Output = Result<Response, Response>>,
 {
-    resolve_virtual_metadata_walk(
+    // Boxed: the walk's future is large, and holding it inline in each
+    // caller's future overflows the stack of a debug-build test thread.
+    Box::pin(resolve_virtual_metadata_walk(
         db,
         auth,
         proxy_service,
@@ -4784,7 +4786,7 @@ where
         path,
         transform,
         false,
-    )
+    ))
     .await
 }
 
@@ -4812,7 +4814,9 @@ where
     F: Fn(Bytes, Option<String>, Option<String>, Option<DateTime<Utc>>, String) -> Fut,
     Fut: std::future::Future<Output = Result<Response, Response>>,
 {
-    resolve_virtual_metadata_walk(
+    // Boxed: the walk's future is large, and holding it inline in each
+    // caller's future overflows the stack of a debug-build test thread.
+    Box::pin(resolve_virtual_metadata_walk(
         db,
         auth,
         proxy_service,
@@ -4820,7 +4824,7 @@ where
         path,
         transform,
         true,
-    )
+    ))
     .await
 }
 

@@ -1447,13 +1447,14 @@ async fn version_info(
             }
 
             let upstream_path = build_go_upstream_path(module, version, "info");
-            return match try_proxy_go_metadata(
+            // Boxed for the same stack-size reason as the walk it wraps.
+            return match Box::pin(try_proxy_go_metadata(
                 state,
                 auth,
                 repo,
                 &upstream_path,
                 "application/json",
-            )
+            ))
             .await
             {
                 Ok(resp) => Ok(resp),
