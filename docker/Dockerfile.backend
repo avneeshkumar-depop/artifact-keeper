@@ -59,7 +59,7 @@ ENV SQLX_OFFLINE=true
 # pools, 4 -- the core count -- on the GitHub-hosted arm64 leg); the default
 # covers `docker compose --build` in the E2E suites, which passes no build
 # args. Declared per stage because an ARG does not cross a FROM.
-ARG CARGO_BUILD_JOBS=2
+ARG CARGO_BUILD_JOBS=8
 ENV CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS}
 ARG CARGO_FEATURES=""
 # Cargo profile for the two compiling stages and the binary path the runtime
@@ -71,7 +71,7 @@ ARG CARGO_FEATURES=""
 # RUN below sees the value, so each profile gets its own dependency layer.
 # Must name a profile whose output directory is its own name (`release` or a
 # custom one), not `dev`/`test`, which write to `target/debug/`.
-ARG CARGO_PROFILE=ci
+ARG CARGO_PROFILE=release
 RUN if [ -n "$CARGO_FEATURES" ]; then \
       cargo chef cook --profile "$CARGO_PROFILE" --features "$CARGO_FEATURES" --recipe-path recipe.json; \
     else \
@@ -90,10 +90,10 @@ ARG GIT_SHA=unknown
 ARG CARGO_FEATURES=""
 ARG APP_VERSION=""
 # Same cap as the deps stage above.
-ARG CARGO_BUILD_JOBS=2
+ARG CARGO_BUILD_JOBS=8
 # Same profile as the deps stage above; the two must match or the cooked
 # dependencies are not reused.
-ARG CARGO_PROFILE=ci
+ARG CARGO_PROFILE=release
 ENV SQLX_OFFLINE=true
 ENV GIT_SHA=${GIT_SHA}
 ENV CARGO_BUILD_JOBS=${CARGO_BUILD_JOBS}
@@ -980,7 +980,7 @@ COPY --from=grype-db-seed --chown=1001:0 --chmod=0550 /grype-db /home/artifact/.
 
 # Copy application binary (from `target/<profile>/`; see CARGO_PROFILE in the
 # deps stage).
-ARG CARGO_PROFILE=ci
+ARG CARGO_PROFILE=release
 COPY --from=builder /app/target/${CARGO_PROFILE}/artifact-keeper /usr/local/bin/
 
 # Remove the bash shell that the ubi-micro BASE layer ships (the rootfs-builder
